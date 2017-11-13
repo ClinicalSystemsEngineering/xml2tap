@@ -32,4 +32,6 @@ but can easily be changed in the source before compiling.
 
 The lumberjack loging package is used to log data to file and the default location is /var/log/xml2tap/xml2tap.log.
 
+The executable file was compiled on a windows 10 machine and has been tested on windows server 2012 r2.
+
 
