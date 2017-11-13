@@ -77,17 +77,6 @@ func main() {
 	httpPort := flag.String("httpPort","80","localhost listner port for http server")
 	flag.Parse()
 	
-	// //log output file
-	// f, err := os.OpenFile("filename", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	// if err != nil {
-	// 		log.Fatal(err)
-	// }   
-	// //defer to close 
-	// defer f.Close()
-
-	// //set output of logs to file
-	// log.SetOutput(f)
-
 
 	log.SetOutput(&lumberjack.Logger{
 		Filename:   "/var/log/xml2tap/xml2tap.log",
