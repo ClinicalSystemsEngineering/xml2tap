@@ -24,10 +24,12 @@ type Page struct {
 
 var queuesize = 0 //the size of the processed message channel
 
+//HomePage not yet implemented
 func HomePage(w http.ResponseWriter, req *http.Request) {
 
 }
 
+//StatusPage displays the size of the queue for monitoring purposes
 func StatusPage(w http.ResponseWriter, req *http.Request) {
 	if queuesize <= 300 {
 		fmt.Fprintf(w, "OK: Curent Queue Size:%v", queuesize)
@@ -37,6 +39,7 @@ func StatusPage(w http.ResponseWriter, req *http.Request) {
 
 }
 
+//SendPage not yet implemented
 func SendPage(w http.ResponseWriter, req *http.Request) {
 
 }
