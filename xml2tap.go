@@ -16,6 +16,7 @@ import (
 	"time"
 )
 
+//Page is the r5 xml structure.  although an r5 message contains Type it has been omitted for now.
 type Page struct {
 	ID      string `xml:"ID"`
 	TagText string `xml:"TagText"`
