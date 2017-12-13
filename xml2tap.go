@@ -1,11 +1,10 @@
 package main
 
 import (
+	"gopkg.in/natefinch/lumberjack.v2" //rotational logging
 	"log"
 	"net"
 	"tap"
-
-	"gopkg.in/natefinch/lumberjack.v2" //rotational logging
 	//"strings"
 	"encoding/xml"
 	"flag"
@@ -32,10 +31,10 @@ func HomePage(w http.ResponseWriter, req *http.Request) {
 
 //StatusPage displays the size of the queue for monitoring purposes
 func StatusPage(w http.ResponseWriter, req *http.Request) {
-	if queuesize <= 300 {
-		fmt.Fprintf(w, "OK: Curent Queue Size:%v", queuesize)
+	if queuesize <= 100 {
+		fmt.Fprintf(w, "OK: Current Queue Size:%v", queuesize)
 	} else {
-		fmt.Fprintf(w, "ERROR: Curent Queue Size:%v", queuesize)
+		fmt.Fprintf(w, "ERROR: Current Queue Size:%v", queuesize)
 	}
 
 }
@@ -50,7 +49,7 @@ func webserver(msgchan chan string, portnum string) {
 	http.HandleFunc("/status", StatusPage)
 	http.HandleFunc("/page", SendPage)
 	for {
-		log.Print(http.ListenAndServe(":"+portnum, nil))
+		log.Println(http.ListenAndServe(":"+portnum, nil))
 	}
 }
 
@@ -130,7 +129,7 @@ func main() {
 				// XML token in the stream
 				t, err := d.Token()
 				if err != nil {
-					log.Printf("Token error %v", err.Error())
+					log.Printf("Token error %v\n", err.Error())
 					break
 				}
 				switch et := t.(type) {
@@ -143,13 +142,13 @@ func main() {
 						// if no matching token is found, there will be an error
 						// note the search only happens within the parent.
 						if err := d.DecodeElement(&p, &et); err != nil {
-							log.Printf("error decoding element %v", err.Error())
+							log.Printf("error decoding element %v\n", err.Error())
 							c.Close()
 							return
 						}
 
 						// We have decoded the xml message now send it off to TAP server or reply if ping
-						log.Printf("Pin:%v;Msg:%v\n", p.ID, p.TagText)
+						log.Printf("Parsed: Pin:%v;Msg:%v\n", p.ID, p.TagText)
 
 						//note the R5 system periodically sends out a PING looking for a response
 						//this will handle that response or put the decoded xml into the TAP output queue
