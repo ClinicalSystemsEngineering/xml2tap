@@ -4,7 +4,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2" //rotational logging
 	"log"
 	"net"
-	"tap"
+	"github.com/ClinicalSystemsEngineering/tap"
 	//"strings"
 	"encoding/xml"
 	"flag"
