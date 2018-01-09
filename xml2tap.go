@@ -1,18 +1,18 @@
 package main
 
 import (
-	"gopkg.in/natefinch/lumberjack.v2" //rotational logging
 	"log"
 	"net"
+
 	"github.com/ClinicalSystemsEngineering/tap"
+	"gopkg.in/natefinch/lumberjack.v2" //rotational logging
 	//"strings"
 	"encoding/xml"
 	"flag"
 	//"os"
 	"fmt"
+	"html/template"
 	"net/http"
-	//"html/template"
-	"time"
 )
 
 //Page is the r5 xml structure.  although an r5 message contains Type it has been omitted for now.
@@ -22,15 +22,38 @@ type Page struct {
 	//Type string `xml:"Type"`
 }
 
+type webpage struct {
+	Title   string
+	Heading string
+	Body    []string
+}
+
+var webpageurls = []string{"status", "page"}
+
 var queuesize = 0 //the size of the processed message channel
+
+var parsedmsgs = make(chan string, 10000) //message processing channel for xml2tap conversions
 
 //HomePage not yet implemented
 func HomePage(w http.ResponseWriter, req *http.Request) {
 
+	homepage := webpage{Title: "XML2TAP Homepage", Heading: "List of Commands:", Body: webpageurls}
+
+	tpl, err := template.ParseFiles("index.gohtml")
+	if err != nil {
+		log.Printf("error parsing index template: %v", err)
+	}
+	err = tpl.ExecuteTemplate(w, "index.gohtml", homepage)
+	if err != nil {
+		log.Printf("error executing template index: %v", err)
+	}
 }
 
 //StatusPage displays the size of the queue for monitoring purposes
 func StatusPage(w http.ResponseWriter, req *http.Request) {
+
+	queuemonitor()
+
 	if queuesize <= 100 {
 		fmt.Fprintf(w, "OK: Current Queue Size:%v", queuesize)
 	} else {
@@ -53,11 +76,10 @@ func webserver(msgchan chan string, portnum string) {
 	}
 }
 
-func queuemonitor(msgchan chan string) {
-	for {
-		queuesize = len(msgchan)
-		time.Sleep(5 * time.Second)
-	}
+func queuemonitor() {
+
+	queuesize = len(parsedmsgs)
+
 }
 
 //example r5 xml
@@ -97,17 +119,11 @@ func main() {
 	}
 	defer l.Close()
 
-	//message processing channel for sip2tap conversions 1000 chosen as 1 per bed maximum
-	parsedmsgs := make(chan string, 1000)
-
 	//start a tap server
 	go tap.Server(parsedmsgs, *tapPort)
 
 	//start a webserver
 	go webserver(parsedmsgs, *httpPort)
-
-	//start a queue monitor
-	go queuemonitor(parsedmsgs)
 
 	for {
 
