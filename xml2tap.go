@@ -71,6 +71,7 @@ func webserver(msgchan chan string, portnum string) {
 	http.HandleFunc("/", HomePage)
 	http.HandleFunc("/status", StatusPage)
 	http.HandleFunc("/page", SendPage)
+	http.Handle("/favicon.ico", http.NotFoundHandler())
 	for {
 		log.Println(http.ListenAndServe(":"+portnum, nil))
 	}
