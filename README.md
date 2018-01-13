@@ -6,12 +6,12 @@ though the solution is very straightforward and simple it is currently undergoin
 Connexall.
 If you choose to use/test this application please provide feedback where applicable for future updates.
 
-This application is a simple attemt for replacing the default Responder 5 paging service.
+This application is a simple solution for replacing the default Responder 5 paging service.
 We have documented that the default Responder 5 paging service only supports a throughput of
 about 38 messages/min.  In larger hospitals, traffic can easily overburden the system causing
-messages to queue for several minutes.  This is especially prevalent during power surges that cause multiple bed exit
+messages to queue for several minutes.  This is especially prevalent during power surges that can cause multiple bed exit
 messages to generate or if staff terminal or other call assignments have multiple caregivers assigned
-to a call stop.  As you can imagine this could be problematic for high priority notifications.
+to a call stop.  As you can imagine this could be problematic for high priority notifications such as Code Blue.
 
 There are several command line flags that can be used to set various ports.
 The following are the default settings:
@@ -27,7 +27,7 @@ Note the tap port is a server connection and not a client.
 
 When no message data is being received the application will produce a tap output reconnect routine as a means of keep alive.
 
-The http site is used for status diagnositics and monitoring if messages beging to queue.  Currently this is hardcoded at 300 messages
+The http site is used for status diagnositics and monitoring if messages begin to queue.  Currently this is hardcoded at 100 messages
 but can easily be changed in the source before compiling.
 
 The lumberjack loging package is used to log data to file and the default location is /var/log/xml2tap/xml2tap.log.
