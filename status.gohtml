@@ -8,6 +8,9 @@
         <h1>{{ .Heading}}</h1>
         
         {{range .Body}}
+            <p>{{ . }}</p>
+        {{end}}
+        {{range .Nav}}
             <p><a href="/{{ . }}">{{ . }}</a></p>
         {{end}}
     </body>
