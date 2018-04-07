@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net"
+	"time"
 
 	"github.com/ClinicalSystemsEngineering/tap"
 	"gopkg.in/natefinch/lumberjack.v2" //rotational logging
@@ -35,6 +36,8 @@ var webpageurls = []string{"home", "status", "page"}
 var queuesize = 0 //the size of the processed message channel
 
 var parsedmsgs = make(chan string, 10000) //message processing channel for xml2tap conversions
+
+var timeoutDuration = 5 * time.Second //read / write timeout duration
 
 //HomePage not yet implemented
 func HomePage(w http.ResponseWriter, req *http.Request) {
@@ -128,7 +131,7 @@ func SendPage(w http.ResponseWriter, req *http.Request) {
 
 }
 
-func webserver(msgchan chan string, portnum string) {
+func webserver(portnum string) {
 	http.HandleFunc("/", HomePage)
 	http.HandleFunc("/home", HomePage)
 	http.HandleFunc("/status", StatusPage)
@@ -186,7 +189,7 @@ func main() {
 	go tap.Server(parsedmsgs, *tapPort)
 
 	//start a webserver
-	go webserver(parsedmsgs, *httpPort)
+	go webserver(*httpPort)
 
 	for {
 
@@ -235,7 +238,13 @@ func main() {
 							//send response to connection
 							response := "<?xml version=\"1.0\" encoding=\"utf-8\"?> <PageTXSrvResp State=\"7\" PagesInQueue=\"0\" PageOK=\"1\" />"
 							log.Printf("Responding:%v\n", response)
-							c.Write([]byte(response))
+							c.SetWriteDeadline(time.Now().Add(timeoutDuration))
+							_, err = c.Write([]byte(response))
+							if err != nil {
+								log.Println("Timeout error writing PING response")
+								return
+							}
+
 						} else {
 							parsedmsgs <- string(p.ID) + ";" + string(p.TagText)
 
