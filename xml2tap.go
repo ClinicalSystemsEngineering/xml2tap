@@ -167,6 +167,7 @@ func main() {
 	xmlPort := flag.String("xmlPort", "5051", "xml listener port for localhost")
 	tapPort := flag.String("tapPort", "10001", "localhost listener port for TAP server")
 	httpPort := flag.String("httpPort", "80", "localhost listner port for http server")
+	tapAdr := flag.String("tapAdr", "127.0.0.1:10001", "server address for TAP client form is serverip:port")
 	flag.Parse()
 
 	log.SetOutput(&lumberjack.Logger{
@@ -185,11 +186,17 @@ func main() {
 	}
 	defer l.Close()
 
-	//start a tap server
-	go tap.Server(parsedmsgs, *tapPort)
-
 	//start a webserver
 	go webserver(*httpPort)
+
+	//check for client or server
+	if *tapAdr == "127.0.0.1:10001" {
+		//start a tap server
+		go tap.Server(parsedmsgs, *tapPort)
+	} else {
+		//start a tap Client
+		go tap.Client(parsedmsgs, *tapAdr)
+	}
 
 	for {
 
