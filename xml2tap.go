@@ -7,9 +7,11 @@ import (
 
 	"github.com/ClinicalSystemsEngineering/tap"
 	"gopkg.in/natefinch/lumberjack.v2" //rotational logging
+
 	//"strings"
 	"encoding/xml"
 	"flag"
+
 	//"os"
 	"html/template"
 	"net/http"
@@ -65,9 +67,9 @@ func StatusPage(w http.ResponseWriter, req *http.Request) {
 
 	//determine if queue size is in error state or not currently hardcoded to 100
 	if queuesize <= 100 {
-		queuestatus = append(queuestatus, "OK: Current Queue Size:"+strconv.Itoa(queuesize))
+		queuestatus = append(queuestatus, "OK: Pages in queue:"+strconv.Itoa(queuesize))
 	} else {
-		queuestatus = append(queuestatus, "ERROR: Current Queue Size:"+strconv.Itoa(queuesize))
+		queuestatus = append(queuestatus, "ERROR: Pages in queue:"+strconv.Itoa(queuesize))
 	}
 
 	statuspage := webpage{Title: "XML2TAP Statuspage", Heading: "Current Queue Status:", Body: queuestatus, Nav: webpageurls}
