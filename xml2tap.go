@@ -234,6 +234,7 @@ func main() {
 						// note the search only happens within the parent.
 						if err := d.DecodeElement(&p, &et); err != nil {
 							log.Printf("error decoding element %v\n", err.Error())
+							log.Println("Closing Connection")
 							c.Close()
 							return
 						}
@@ -251,6 +252,8 @@ func main() {
 							_, err = c.Write([]byte(response))
 							if err != nil {
 								log.Println("Timeout error writing PING response")
+								log.Println("Closing Connection")
+								c.Close()
 								return
 							}
 
@@ -268,9 +271,11 @@ func main() {
 				}
 
 			}
-
+			log.Println("Closing Connection")
 			c.Close()
+			return
 		}(conn, parsedmsgs)
+
 	}
 
 }
