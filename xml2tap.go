@@ -221,7 +221,9 @@ func main() {
 				t, err := d.Token()
 				if err != nil {
 					log.Printf("Token error %v\n", err.Error())
-					break
+					log.Println("Closing Connection")
+					c.Close()
+					return
 				}
 				switch et := t.(type) {
 
