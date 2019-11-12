@@ -15,6 +15,8 @@ import (
 	//"os"
 	"html/template"
 	"net/http"
+	"net/http/pprof"
+	_ "net/http/pprof"
 	"strconv"
 )
 
@@ -134,13 +136,27 @@ func SendPage(w http.ResponseWriter, req *http.Request) {
 }
 
 func webserver(portnum string) {
-	http.HandleFunc("/", HomePage)
-	http.HandleFunc("/home", HomePage)
-	http.HandleFunc("/status", StatusPage)
-	http.HandleFunc("/page", SendPage)
-	http.Handle("/favicon.ico", http.NotFoundHandler())
+	r := http.NewServeMux()
+	r.HandleFunc("/", HomePage)
+	r.HandleFunc("/home", HomePage)
+	r.HandleFunc("/status", StatusPage)
+	r.HandleFunc("/page", SendPage)
+	r.Handle("/favicon.ico", http.NotFoundHandler())
 	for {
-		log.Println(http.ListenAndServe(":"+portnum, nil))
+		log.Println(http.ListenAndServe(":"+portnum, r))
+	}
+}
+
+func profileserver(portnum string) {
+	r := http.NewServeMux()
+	r.HandleFunc("/debug/pprof/", pprof.Index)
+	r.HandleFunc("debug/pprof/cmdline", pprof.Cmdline)
+	r.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	r.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	r.HandleFunc("/debug/pprof/trace", pprof.Trace)
+
+	for {
+		log.Println(http.ListenAndServe(":"+portnum, r))
 	}
 }
 
@@ -169,10 +185,11 @@ func main() {
 	xmlPort := flag.String("xmlPort", "5051", "xml listener port for localhost")
 	tapPort := flag.String("tapPort", "10001", "localhost listener port for TAP server")
 	httpPort := flag.String("httpPort", "80", "localhost listner port for http server")
+	pprofPort := flag.String("pprofPort", "8080", "localhost listner port for http server")
 	tapAdr := flag.String("tapAdr", "127.0.0.1:10001", "server address for TAP client form is serverip:port")
 	tapwhitelist := flag.String("tapwhitelist", "127.0.0.1", "ip address for incoming tap connection")
 	xmlwhitelist := flag.String("xmlwhitelist", "127.0.0.1", "ip address for incoming xml connection")
-
+	verbose := flag.Bool("verbose", false, "allow verbose logging true/false")
 	flag.Parse()
 
 	log.SetOutput(&lumberjack.Logger{
@@ -195,13 +212,16 @@ func main() {
 	//start a webserver
 	go webserver(*httpPort)
 
+	//start a profiler server
+	go profileserver(*pprofPort)
+
 	//check for client or server
 	if *tapAdr == "127.0.0.1:10001" {
 		//start a tap server
-		go tap.Server(parsedmsgs, *tapPort, *tapwhitelist)
+		go tap.Server(parsedmsgs, *tapPort, *tapwhitelist, *verbose)
 	} else {
 		//start a tap Client
-		go tap.Client(parsedmsgs, *tapAdr)
+		go tap.Client(parsedmsgs, *tapAdr, *verbose)
 	}
 
 	for {
@@ -266,7 +286,9 @@ func main() {
 							if p.ID == "" && p.TagText == "___PING___" {
 								//send response to connection
 								response := "<?xml version=\"1.0\" encoding=\"utf-8\"?> <PageTXSrvResp State=\"7\" PagesInQueue=\"0\" PageOK=\"1\" />"
-								log.Printf("Responding:%v\n", response)
+								if *verbose {
+									log.Printf("Responding:%v\n", response)
+								}
 								c.SetWriteDeadline(time.Now().Add(timeoutDuration))
 								_, err = c.Write([]byte(response))
 								if err != nil {
