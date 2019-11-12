@@ -247,7 +247,7 @@ func main() {
 		{
 			log.Printf("XML Client ip %v accepted. Handling connection.\n", addr.IP.String())
 			// Handle connections in a new goroutine.
-			go func(c net.Conn, msgs chan<- string) {
+			go func(c net.Conn, msgs chan<- string, verbose bool) {
 				//set up a decoder on the stream
 				d := xml.NewDecoder(c)
 
@@ -286,7 +286,7 @@ func main() {
 							if p.ID == "" && p.TagText == "___PING___" {
 								//send response to connection
 								response := "<?xml version=\"1.0\" encoding=\"utf-8\"?> <PageTXSrvResp State=\"7\" PagesInQueue=\"0\" PageOK=\"1\" />"
-								if *verbose {
+								if verbose {
 									log.Printf("Responding:%v\n", response)
 								}
 								c.SetWriteDeadline(time.Now().Add(timeoutDuration))
@@ -315,7 +315,7 @@ func main() {
 				log.Println("Closing Connection")
 				c.Close()
 				return
-			}(conn, parsedmsgs)
+			}(conn, parsedmsgs, *verbose)
 
 		}
 	}
