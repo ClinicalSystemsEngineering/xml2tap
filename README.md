@@ -18,11 +18,17 @@ The following are the default settings:
 
 
 Flag: -xmlPort DefaultValue: 5051 Description: xml listener port for localhost
+
 Flag: -tapPort DefaultValue: 10001 Description: localhost listener port for TAP server
+
 Flag: -httpPort DefaultValue: 80 Description: localhost listner port for http server
+
 Flag: -pprofPort DefaultValue: 8080 Description: localhost listner port for http server
+
 Flag: -tapAdr DefaultValue: 127.0.0.1:10001 Description: server address for TAP client form is serverip:port
+
 Flag: -tapwhitelist DefaultValue: 127.0.0.1 Description: ip address for incoming tap connection
+
 Flag: -xmlwhitelist DefaultValue:127.0.0.1 Description:ip address for incoming xml connection")
 
 example useage: .\xml2tap -xmlPort 5050 -tapPort 1000 -httpPort 85
